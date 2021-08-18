@@ -10,19 +10,19 @@ enum FruitStoreError: Error {
     case outOfStock
 }
 
-enum HandlingFruit: String, CaseIterable {
-    case strawberry
-    case banana
-    case fineapple
-    case kiwi
-    case mango
-}
-
 class FruitStore {
+    enum HandlingFruit: String, CaseIterable {
+        case strawberry
+        case banana
+        case fineapple
+        case kiwi
+        case mango
+    }
+    
     static let shared = FruitStore()
     
     private let defaultStock: Int = 10
-    private var fruitStock: [HandlingFruit: Int] = [: ]
+    private(set) var fruitStock: [HandlingFruit: Int] = [: ]
     
     private init() {
         fruitStock = HandlingFruit.allCases.reduce(into: [: ]) { fruitStock, HandlingFruit in
@@ -31,7 +31,7 @@ class FruitStore {
     }
     
     func changeFruitStock(fruit: HandlingFruit, amount: Int) {
-            fruitStock[fruit] = amount
+        fruitStock[fruit] = amount
     }
     
     func useFruitToMakeJuice(ingredients: [HandlingFruit: Int]) {
@@ -41,21 +41,16 @@ class FruitStore {
         }
     }
     
-    func isIngredientOutOfStock(ingredients: [HandlingFruit: Int]) throws -> Bool {
+    func isAllIngredientEnough(ingredients: [HandlingFruit: Int]) throws {
         let totalIngrdients = ingredients.map { return ($0, $1) }
         for fruit in totalIngrdients {
-            if try haveEnoughFruitToMakeJuice(fruit: fruit) == false {
-                return true
-            }
+            try haveEnoughFruit(fruit: fruit)
         }
-        return false
     }
     
-    func haveEnoughFruitToMakeJuice(fruit: (name: HandlingFruit,stock: Int)) throws -> Bool {
+    private func haveEnoughFruit(fruit: (name: HandlingFruit,stock: Int)) throws {
         guard let selectedFruitStock = fruitStock[fruit.name], selectedFruitStock >= fruit.stock else {
             throw FruitStoreError.outOfStock
         }
-        return true
     }
 }
-

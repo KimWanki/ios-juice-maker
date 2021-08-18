@@ -7,16 +7,16 @@
 import Foundation
 
 struct JuiceMaker {
-    enum JuiceMenu {
-        case strawberry
-        case banana
-        case kiwi
-        case fineapple
-        case strawberryBanana
-        case mango
-        case mangoKiwi
+    enum JuiceMenu: String {
+        case strawberry = "딸기쥬스"
+        case banana = "바나나쥬스"
+        case kiwi = "키위쥬스"
+        case fineapple = "파인애플쥬스"
+        case strawberryBanana = "딸바쥬스"
+        case mango = "망고쥬스"
+        case mangoKiwi = "망키쥬스"
         
-        var recipe: [HandlingFruit: Int] {
+        var recipe: [FruitStore.HandlingFruit: Int] {
             switch self {
             case .strawberry:
                 return [.strawberry: 16]
@@ -34,22 +34,17 @@ struct JuiceMaker {
                 return [.mango: 2, .kiwi: 1]
             }
         }
+
+        func description() -> String {
+            return self.rawValue
+        }
     }
     
     private let store: FruitStore = FruitStore.shared
     
-    func makeJuice(menu: JuiceMenu) {
-        do{
-            let ingredients: [HandlingFruit: Int] = menu.recipe
-            let isOutOfStock = try store.isIngredientOutOfStock(ingredients: ingredients)
-            if isOutOfStock == false {
-                store.useFruitToMakeJuice(ingredients: ingredients)
-                print(menu, "Juice made")
-            }
-        } catch FruitStoreError.outOfStock {
-            print("Out of stock")
-        } catch {
-            print("Invalid Error")
-        }
+    func makeJuice(menu: JuiceMenu) throws {
+        let ingredients: [FruitStore.HandlingFruit: Int] = menu.recipe
+        try store.isAllIngredientEnough(ingredients: ingredients)
+        store.useFruitToMakeJuice(ingredients: ingredients)
     }
 }
